@@ -1,2 +1,2 @@
 # Particle-Collision
-python particle collision simulation with pygame
+python particle collision simulation with pygame!
