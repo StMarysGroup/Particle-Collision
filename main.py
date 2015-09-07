@@ -15,9 +15,43 @@ class EventSystem:
 
 	def Update(self):
 		self.time = self.time + 1
-		if self.time = self.timeOfEvent:
-			self.candidate
+		#if self.time = self.timeOfEvent:
+		#	self.candidate
+
 		
+
+
+
+
+class Event:
+	def __init__(self, t, ParticleA, ParticleB):
+		self.time = t
+		self.a = ParticleA
+		self.b = ParticleB
+		self.CountA = 0
+		self.CountB = 0
+		if self.a:
+			self.CountA = self.a.count()
+		else:
+			self.CountA = -1
+		if self.b:
+			self.CountB = self.b.count()
+		else:
+			self.CountB = -1
+
+	def compareTimeOfEvents (self, otherEvent):
+		if self.time < otherEvent.time
+			return -1
+		elif self.time > otherEvent.time:
+			return 1
+		else:
+			return 0
+	def isThisEventStillValid(self):
+		if self.a and self.a.count() is not self.CountA:
+			return False
+		if self.b and self.b.count() is not self.CountB:
+			return False
+		return True
 
 
 
