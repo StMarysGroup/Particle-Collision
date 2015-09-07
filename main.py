@@ -5,6 +5,7 @@ import random
 '''
 
 
+
 class EventSystem:
 	def __init__(self):
 		self.particles = []
@@ -40,7 +41,7 @@ class Event:
 			self.CountB = -1
 
 	def compareTimeOfEvents (self, otherEvent):
-		if self.time < otherEvent.time
+		if self.time < otherEvent.time:
 			return -1
 		elif self.time > otherEvent.time:
 			return 1
@@ -57,45 +58,135 @@ class Event:
 
 class Particle:
 	def __init__(self, rx, ry, vx, vy, s, mass, screen):
+		# position
 		self.rx = rx
 		self.ry = ry
+		# velocity
 		self.vx = vx
 		self.vy = vy
+		# radius
 		self.s = s
+		# mass
 		self.mass = mass
+		# number of collisions so far, pygame screen, color
 		self.count = 0
 		self.screen = screen
 		self.GREEN =  (0, 255, 0)
 
+
 	def Update(self):
-		pygame.draw.circle(self.screen, self.GREEN, (self.rx, self.ry), self.s, 0)
+		self.draw()
 		self.move(0)
 		self.timeToHitWall()
 
 	def move(self, dt):
-		self.rx = self.rx + self.vx
-		self.ry = self.ry + self.vy
+		self.rx += self.vx * dt
+		self.ry += self.vy * dt
+
+	def draw(self):
+		pygame.draw.circle(self.screen, self.GREEN, (self.rx, self.ry), self.s, 0)
 
 	def count():
 		return self.count
 
-	#def timeToHit(b):
+	def timeToHitParticle(self, ParticleB):
+		# he makes a copy for some reason, idk why.
+		if self is ParticleB:
+			return INFINITY
+		# diff in x, y
+		dx = ParticleB.rx - self.rx
+		dy = ParticleB.ry - self.ry
+		# diff in velocity
+		dvx = ParticleB.vx - self.vx
+		dvy = ParticleB.vy - self.vy
+		# the 
+		dvdr = dx*dvx + dy*dvy
+		if dvdr > 0:
+			return INFINITY
+		# diff in velocity squared
+		dvdv = dvx*dvx + dvy*dvy
+		# diff in position squared
+		drdr = dx*dx + dy*dy
+		# the distance between the centers of the particles at collision
+		sigma = self.radius + ParticleB.radius
+		d = (dvdr*dvdr) - dvdv * (drdr - sigma*sigma)
+		# overlap if drdr < sigma*sigma
+		if d < 0 return INFINITY
+		# return the time that it will be when the particles hit
+		return -(dvdr + math.sqrt(d)) / dvdv
 
-	def timeToHitWall(self):
+
+	'''def timeToHitWall(self):
 		
 		dt = (width - self.s - self.rx)/self.vx
 		print(dt)
 		if dt == 0:
 			self.vx = self.vx * -1
 			#dt = 1
-			
+	'''
+
+
+	# NOTE: might have height/width backwards in some places!!! should be easy to tell!
+	def timeToHitVerticalWall(self):
+		if self.vx > 0:
+			return (height - self.rx - self.radius) / self.vx
+		elif self.vx < 0:
+			return (self.radius - self.rx) / self.vx
+		else:
+			return INFINITY
+
+	def timeToHitHorizontalWall(self):
+		if self.vy > 0:
+			return (self.height - self.ry - self.radius) / self.vy
+		elif self.vx < 0:
+			return (self.radius - self.ry) / self.vy
+		else:
+			return INFINITY	
 		
+	def bounceOffOfOtherParticle(self, other):
+		dx = other.rx - self.rx
+		dy = other.ry - self.ry
+		dvx = other.vx - self.vx
+		dvy = other.vy - self.vy
+		dvdr = dx*dvx + dy*dvy # dv dot dr
+		dist = self.radius + other.radius
+
+		# normal force, split into directions
+		F = 2 * self.mass * other.mass * dvdr / ((self.mass + other.mass) * dist)
+		fx = F*dx/dist
+		fy = F*dy/dist
+
+		# update velocities 
+		self.vx += fx/self.mass
+		self.vy += fy/self.mass
+		other.vx -= fx/self.mass
+		other.vy -= fy/self.mass
+
+		# update counts of collisions
+		self.count += 1
+		other.count += 1
+
+	def bounceOffOfVerticalWall(self):
+		self.vx = -self.vx
+		self.count += 1
+
+	def bounceOffOfHorizontalWall(self):
+		self.vy = -self.vy
+		self.count += 1
+
+	def getKineticEnergy(self):
+		return 0.5 * self.mass * (self.vx*self.vx + self.vy*self.vy)
+
+	
 
 
 
 
 
 print("test")
+
+
+INFINITY = float("inf")
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
