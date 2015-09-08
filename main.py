@@ -1,5 +1,6 @@
 import pygame
 import random
+import Queue
 
 ''' Event driven particle simulation, hard bodies (disks) bouncing off of each other and the walls
 '''
@@ -7,17 +8,31 @@ import random
 
 
 class EventSystem:
-	def __init__(self):
-		self.particles = []
-		self.candidate = None
+	def __init__(self, particles):
+		self.particles = particles
 		self.time = 0
+		self.hz = 0.5
 		self.timeUntilEvent = 0
 		self.timeOfEvent = 0
+		self.pq = Queue.PriorityQueue()
 
 	def Update(self):
 		self.time = self.time + 1
+
 		#if self.time = self.timeOfEvent:
 		#	self.candidate
+
+	# update the pq with new events for particle a
+	def predict(a, limit):
+		if a is None:
+			return 
+
+		# particle - particle collisions
+		for particle in self.particles:
+			dt = a.timeToHitParticle(particle)
+			if (dt + self.time <= limit):
+				# pq.put (time of event(dt + t), event(time of event (dt + t), particle, particle))
+				self.pq.put(dt + self.time, Event(dt + self.time, a, particle))
 
 		
 
@@ -177,7 +192,7 @@ class Particle:
 	def getKineticEnergy(self):
 		return 0.5 * self.mass * (self.vx*self.vx + self.vy*self.vy)
 
-	
+
 
 
 
