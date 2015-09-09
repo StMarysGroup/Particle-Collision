@@ -23,7 +23,7 @@ class EventSystem:
 		#	self.candidate
 
 	# update the pq with new events for particle a
-	def predict(a, limit):
+	def predict(self, a, limit):
 		if a is None:
 			return 
 
@@ -32,7 +32,48 @@ class EventSystem:
 			dt = a.timeToHitParticle(particle)
 			if (dt + self.time <= limit):
 				# pq.put (time of event(dt + t), event(time of event (dt + t), particle, particle))
-				self.pq.put(dt + self.time, Event(dt + self.time, a, particle))
+				# scratch that, updated comparator for the events, now i should only have to put in a single thing (the particle)
+				# update 9/9: this works, see priorityQueue.py
+				self.pq.put(Event(dt + self.time, a, particle))
+
+		#particle - wall collisions
+		dtX = a.timeToHitVerticalWall()
+		dtY = a.timeToHitHorizontalWall()
+		if (t + dtX <= limit):
+			self.pq.put(new Event(t + dtX, a, None))
+		if (t + dtY <= limit):
+			self.pq.put(new Event(t + dtY, None, a))
+
+		# redraw the particles (not sure if i want to do it like how they say to)
+			# actually maybe it is ok, they draw all the particles and then make a new empty event for some reason
+
+	def simulate(self, limit):
+		self.pq = Queue.PriorityQueue()
+		for particle in self.particles:
+			predict(particle, limit)
+
+		self.pq.put(Event(0, None, None))
+
+		while (not self.pq.Empty()):
+			# get impending event, discard if invalid
+			e = pq.get()
+			if (not e.isThisEventStillValid()):
+				continue
+			a = e.a
+			b = e.b
+
+			# collision, update positions and clock
+			for particle in self.particles:
+				particle.move(e.time - t)
+
+			self.time = e.time
+
+			# process event
+			if (a != None and b != None):
+				a.bounceOffOfOtherParticle(b)
+				
+
+
 
 		
 
@@ -68,6 +109,9 @@ class Event:
 		if self.b and self.b.count() is not self.CountB:
 			return False
 		return True
+
+	def __cmp__(self, otherEvent):
+		return self.compareTimeOfEvents(otherEvent)
 
 
 
